@@ -4,6 +4,7 @@ import { assert, forEachValue } from '../util'
 export default class ModuleCollection {
   constructor (rawRootModule) {
     // register root module (Vuex.Store options)
+    console.log(rawRootModule, '注册options')
     this.register([], rawRootModule, false)
   }
 

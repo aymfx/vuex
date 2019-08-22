@@ -1,9 +1,9 @@
 import applyMixin from './mixin'
 import devtoolPlugin from './plugins/devtool'
-import ModuleCollection from './module/module-collection'
+import ModuleCollection from './module/module-collection' // todo3
 import { forEachValue, isObject, isPromise, assert, partial } from './util'
-
-let Vue // bind on install
+// 先大体介绍下各个目录文件的功能： * module：提供module对象与module对象树的创建功能； * plugins：提供开发辅助插件，如“时光穿梭”功能，state修改的日志记录功能等； * helpers.js：提供action、mutations以及getters的查找API； * index.js：是源码主入口文件，提供store的各module构建安装； * mixin.js：提供了store在Vue实例上的装载注入； * util.js：提供了工具方法如find、deepCopy、forEachValue以及assert等方法。
+let Vue // bind on install 用于判断是否已经装载和减少全局作用域查找
 
 export class Store {
   constructor (options = {}) {
@@ -11,10 +11,11 @@ export class Store {
     // To allow users to avoid auto-installation in some cases,
     // this code should be placed here. See #731
     if (!Vue && typeof window !== 'undefined' && window.Vue) {
-      install(window.Vue)
+      install(window.Vue) // 判断若处于浏览器环境下且加载过Vue，则执行install方法。
     }
-
+    // 调用操作
     if (process.env.NODE_ENV !== 'production') {
+      console.log(Vue, 1212)
       assert(Vue, `must call Vue.use(Vuex) before creating a store instance.`)
       assert(typeof Promise !== 'undefined', `vuex requires a Promise polyfill in this browser.`)
       assert(this instanceof Store, `store must be called with the new operator.`)
@@ -23,13 +24,13 @@ export class Store {
     const {
       plugins = [],
       strict = false
-    } = options
+    } = options  // 接受一些参数
 
-    // store internal state
+    // store internal state  仓库的状态
     this._committing = false
     this._actions = Object.create(null)
     this._actionSubscribers = []
-    this._mutations = Object.create(null)
+    this._mutations = Object.create(null) // 创建一个对象
     this._wrappedGetters = Object.create(null)
     this._modules = new ModuleCollection(options)
     this._modulesNamespaceMap = Object.create(null)
@@ -39,10 +40,10 @@ export class Store {
     // bind commit and dispatch to self
     const store = this
     const { dispatch, commit } = this
-    this.dispatch = function boundDispatch (type, payload) {
-      return dispatch.call(store, type, payload)
+    this.dispatch = function boundDispatch (type, payload) { // 分发 action
+      return dispatch.call(store, type, payload) // todo
     }
-    this.commit = function boundCommit (type, payload, options) {
+    this.commit = function boundCommit (type, payload, options) { // 提交 mutation
       return commit.call(store, type, payload, options)
     }
 
@@ -61,7 +62,7 @@ export class Store {
     resetStoreVM(this, state)
 
     // apply plugins
-    plugins.forEach(plugin => plugin(this))
+    plugins.forEach(plugin => plugin(this))  // 应用插件
 
     const useDevtools = options.devtools !== undefined ? options.devtools : Vue.config.devtools
     if (useDevtools) {
@@ -81,26 +82,29 @@ export class Store {
 
   commit (_type, _payload, _options) {
     // check object-style commit
-    const {
+    const { // commit 方法
       type,
       payload,
       options
-    } = unifyObjectStyle(_type, _payload, _options)
+    } = unifyObjectStyle(_type, _payload, _options) //结构一些数据
 
     const mutation = { type, payload }
     const entry = this._mutations[type]
-    if (!entry) {
+    console.log(entry, this._mutations)
+    if (!entry) {  // 判断有没有这个方法  没有就报错
       if (process.env.NODE_ENV !== 'production') {
         console.error(`[vuex] unknown mutation type: ${type}`)
       }
       return
     }
-    this._withCommit(() => {
+    this._withCommit(() => { //
       entry.forEach(function commitIterator (handler) {
+        console.log(handler, '妈耶')
         handler(payload)
       })
-    })
-    this._subscribers.forEach(sub => sub(mutation, this.state))
+    })// 触发事件
+    console.log(this._subscribers[0], '订阅')
+    this._subscribers.forEach(sub => sub(mutation, this.state)) // 给工具做处理
 
     if (
       process.env.NODE_ENV !== 'production' &&
@@ -118,10 +122,10 @@ export class Store {
     const {
       type,
       payload
-    } = unifyObjectStyle(_type, _payload)
+    } = unifyObjectStyle(_type, _payload)  // 结构一些数据
 
     const action = { type, payload }
-    const entry = this._actions[type]
+    const entry = this._actions[type] // todo
     if (!entry) {
       if (process.env.NODE_ENV !== 'production') {
         console.error(`[vuex] unknown action type: ${type}`)
@@ -131,7 +135,7 @@ export class Store {
 
     try {
       this._actionSubscribers
-        .filter(sub => sub.before)
+        .filter(sub => sub.before)  // 提供给工具
         .forEach(sub => sub.before(action, this.state))
     } catch (e) {
       if (process.env.NODE_ENV !== 'production') {
@@ -142,7 +146,7 @@ export class Store {
 
     const result = entry.length > 1
       ? Promise.all(entry.map(handler => handler(payload)))
-      : entry[0](payload)
+      : entry[0](payload)  // ii支持多个同名方法，按照注册的顺序依次触发 统一返回一个promse
 
     return result.then(res => {
       try {
@@ -215,8 +219,9 @@ export class Store {
     resetStore(this, true)
   }
 
-  _withCommit (fn) {
+  _withCommit (fn) { // 防重复点击
     const committing = this._committing
+    console.log(committing, fn, 122)
     this._committing = true
     fn()
     this._committing = committing
@@ -419,7 +424,7 @@ function makeLocalGetters (store, namespace) {
   return gettersProxy
 }
 
-function registerMutation (store, type, handler, local) {
+function registerMutation (store, type, handler, local) { // todo2
   const entry = store._mutations[type] || (store._mutations[type] = [])
   entry.push(function wrappedMutationHandler (payload) {
     handler.call(store, local.state, payload)
@@ -483,7 +488,7 @@ function getNestedState (state, path) {
 }
 
 function unifyObjectStyle (type, payload, options) {
-  if (isObject(type) && type.type) {
+  if (isObject(type) && type.type) { // 如果type 是对象  那么相当与  type = {type,params}
     options = payload
     payload = type
     type = type.type
@@ -497,6 +502,7 @@ function unifyObjectStyle (type, payload, options) {
 }
 
 export function install (_Vue) {
+  // 判断只能安装一次 同时赋值操作 Vue  将局部Vue变量赋值为全局的Vue对象，并执行applyMixin方法，install实现如下
   if (Vue && _Vue === Vue) {
     if (process.env.NODE_ENV !== 'production') {
       console.error(
@@ -506,5 +512,5 @@ export function install (_Vue) {
     return
   }
   Vue = _Vue
-  applyMixin(Vue)
+  applyMixin(Vue) // 干嘛的
 }

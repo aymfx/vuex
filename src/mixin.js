@@ -1,7 +1,7 @@
 export default function (Vue) {
   const version = Number(Vue.version.split('.')[0])
 
-  if (version >= 2) {
+  if (version >= 2) { //如果是2.x.x以上版本，可以使用 hook 的形式进行注入，或使用封装并替换Vue对象原型的_init方法，实现注入。
     Vue.mixin({ beforeCreate: vuexInit })
   } else {
     // override init and inject vuex init procedure
