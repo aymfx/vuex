@@ -62,7 +62,7 @@ export function isPromise (val) {
 }
 
 export function assert (condition, msg) {
-  if (!condition) throw new Error(`[vuex] ${msg}`)
+  if (!condition) throw new Error(`[vuex] ${msg}`)  // 通过操作符判断  来进行断言
 }
 
 export function partial (fn, arg) {

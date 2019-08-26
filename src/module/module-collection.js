@@ -1,6 +1,10 @@
 import Module from './module'
 import { assert, forEachValue } from '../util'
+// 调用 new Vuex.store(options) 时传入的options对象，用于构造ModuleCollection类
 
+/**
+ * ModuleCollection主要将传入的options对象整个构造为一个module对象，并循环调用 this.register([key], rawModule, false) 为其中的modules属性进行模块注册，使其都成为module对象，最后options对象被构造成一个完整的组件树
+ */
 export default class ModuleCollection {
   constructor (rawRootModule) {
     // register root module (Vuex.Store options)
