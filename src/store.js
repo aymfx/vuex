@@ -69,7 +69,7 @@ export class Store {
     // init root module.
     // this also recursively registers all sub-modules
     // and collects all module getters inside this._wrappedGetters
-    installModule(this, state, [], this._modules.root) // back
+    installModule(this, state, [], this._modules.root) // 模块的安装
 
     // initialize the store vm, which is responsible for the reactivity
     // (also registers _wrappedGetters as computed properties)
@@ -129,7 +129,6 @@ export class Store {
       //
       debugger
       entry.forEach(function commitIterator (handler) {
-        console.log(handler, '妈耶')
         handler(payload)
       })
     }) // 触发事件
@@ -308,15 +307,17 @@ function resetStore (store, hot) {
   // reset vm
   resetStoreVM(store, state, hot)
 }
-
+// 执行完各module的install后，执行resetStoreVM方法，进行store组件的初始化。resetStoreVm方法创建了当前store实例的_vm组件，至此store就创建完毕了。
 function resetStoreVM (store, state, hot) {
-  const oldVm = store._vm
+  const oldVm = store._vm // // 缓存前vm组件
 
   // bind store public getters
   store.getters = {}
   const wrappedGetters = store._wrappedGetters
   const computed = {}
   forEachValue(wrappedGetters, (fn, key) => {
+    // 循环所有处理过的getters，并新建computed对象进行存储，通过Object.defineProperty方法为getters对象建立属性，使得我们通过this.$store.getters.xxxgetter能够访问到该getters
+
     // use computed to leverage its lazy-caching mechanism
     // direct inline function use will lead to closure preserving oldVm.
     // using partial to return function with only arguments preserved in closure enviroment.
@@ -331,7 +332,9 @@ function resetStoreVM (store, state, hot) {
   // suppress warnings just in case the user has added
   // some funky global mixins
   const silent = Vue.config.silent
+  // 暂时将Vue设为静默模式，避免报出用户加载的某些插件触发的警告
   Vue.config.silent = true
+  // 设置新的storeVm，将当前初始化的state以及getters作为computed属性（刚刚遍历生成的）
   store._vm = new Vue({
     data: {
       $$state: state
@@ -342,9 +345,10 @@ function resetStoreVM (store, state, hot) {
 
   // enable strict mode for new vm
   if (store.strict) {
+    // 该方法对state执行$watch以禁止从mutation外部修改state
     enableStrictMode(store)
   }
-
+  // 若不是初始化过程执行的该方法，将旧的组件state设置为null，强制更新所有监听者(watchers)，待更新生效，DOM更新完成后，执行vm组件的destroy方法进行销毁，减少内存的占用
   if (oldVm) {
     if (hot) {
       // dispatch changes in all subscribed watchers
@@ -390,17 +394,18 @@ function installModule (store, rootState, path, module, hot) {
   // 命名空间和根目录条件判断完毕后，接下来定义local变量和module.context的值，执行makeLocalContext方法，为该module设置局部的 dispatch、commit方法以及getters和state（由于namespace的存在需要做兼容处理）。
   const local = (module.context = makeLocalContext(store, namespace, path))
 
+  // 注册对应模块的mutation，供state修改使用
   module.forEachMutation((mutation, key) => {
     const namespacedType = namespace + key
     registerMutation(store, namespacedType, mutation, local)
   })
-
+  // 注册对应模块的action，供数据操作、提交mutation等异步操作使用
   module.forEachAction((action, key) => {
     const type = action.root ? key : namespace + key
     const handler = action.handler || action
     registerAction(store, type, handler, local)
   })
-
+  // 注册对应模块的getters，供state读取使用
   module.forEachGetter((getter, key) => {
     const namespacedType = namespace + key
     registerGetter(store, namespacedType, getter, local)
@@ -504,20 +509,25 @@ function makeLocalGetters (store, namespace) {
 
   return gettersProxy
 }
-
+// registerMutation方法中，获取store中的对应mutation type的处理函数集合，将新的处理函数push进去。这里将我们设置在mutations type上对应的 handler 进行了封装，给原函数传入了state。在执行 commit('xxx', payload) 的时候，type为 xxx 的mutation的所有handler都会接收到state以及payload，这就是在handler里面拿到state的原因
 function registerMutation (store, type, handler, local) {
-  // todo2
+  // 取出对应type的mutations-handler集合
   const entry = store._mutations[type] || (store._mutations[type] = [])
+  // commit实际调用的不是我们传入的handler，而是经过封装的
   entry.push(function wrappedMutationHandler (payload) {
+    // 调用handler并将state传入
     handler.call(store, local.state, payload)
   })
 }
 
 function registerAction (store, type, handler, local) {
+  // 取出对应type的actions-handler集合
   const entry = store._actions[type] || (store._actions[type] = [])
+  // 存储新的封装过的action-handler
   entry.push(function wrappedActionHandler (payload, cb) {
     let res = handler.call(
       store,
+      // action handler比mutation handler以及getter wrapper多拿到dispatch和commit操作方法，因此action可以进行dispatch action和commit mutation操作。
       {
         dispatch: local.dispatch,
         commit: local.commit,
@@ -529,6 +539,7 @@ function registerAction (store, type, handler, local) {
       payload,
       cb
     )
+    // action需要支持promise进行链式调用，这里进行兼容处理
     if (!isPromise(res)) {
       res = Promise.resolve(res)
     }
@@ -544,13 +555,16 @@ function registerAction (store, type, handler, local) {
 }
 
 function registerGetter (store, type, rawGetter, local) {
+  // getters只允许存在一个处理函数，若重复需要报错
   if (store._wrappedGetters[type]) {
     if (process.env.NODE_ENV !== 'production') {
       console.error(`[vuex] duplicate getter key: ${type}`)
     }
     return
   }
+  // 存储封装过的getters处理函数
   store._wrappedGetters[type] = function wrappedGetter (store) {
+    // 为原getters传入对应状态
     return rawGetter(
       local.state, // local state
       local.getters, // local getters
@@ -559,8 +573,9 @@ function registerGetter (store, type, rawGetter, local) {
     )
   }
 }
-
+// 上面代码涉及到了严格模式的判断，看一下严格模式如何实现的。
 function enableStrictMode (store) {
+  // 监视state的变化，如果没有通过 this._withCommit() 方法进行state修改，则报错。
   store._vm.$watch(
     function () {
       return this._data.$$state
