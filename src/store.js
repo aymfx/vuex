@@ -127,7 +127,7 @@ export class Store {
     }
     this._withCommit(() => {
       //
-      debugger
+      // debugger
       entry.forEach(function commitIterator (handler) {
         handler(payload)
       })
@@ -367,7 +367,7 @@ function installModule (store, rootState, path, module, hot) {
    */
   const isRoot = !path.length // 判断是不是根目录
   const namespace = store._modules.getNamespace(path) //  this, state, [], this._modules.root
-  debugger
+  // debugger
   // register in namespace map
   if (module.namespaced) {
     if (
