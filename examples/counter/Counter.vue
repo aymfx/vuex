@@ -9,8 +9,8 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
-
+import { mapGetters, mapActions,mapState,mapMutations} from 'vuex'
+  console.log(mapMutations(['count']))
 export default {
   computed: mapGetters([
     'evenOrOdd'

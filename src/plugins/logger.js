@@ -3,11 +3,15 @@
 import { deepCopy } from '../util'
 
 export default function createLogger ({
-  collapsed = true,
-  filter = (mutation, stateBefore, stateAfter) => true,
+  collapsed = true, // 自动展开记录的 mutation
+  filter = (mutation, stateBefore, stateAfter) => true, // 若 mutation 需要被记录，就让它返回 true 即可
+  // 顺便，`mutation` 是个 { type, payload } 对象
   transformer = state => state,
   mutationTransformer = mut => mut,
+  // mutation 按照 { type, payload } 格式记录
+  // 我们可以按任意方式格式化
   logger = console
+  // 自定义 console 实现，默认为 `console`
 } = {}) {
   return store => {
     let prevState = deepCopy(store.state)

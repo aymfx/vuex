@@ -86,7 +86,7 @@ export class Store {
       devtoolPlugin(this)
     }
   }
-
+  // 如果强制的话，会被监听到
   get state () {
     return this._vm._data.$$state
   }
@@ -196,7 +196,7 @@ export class Store {
       return res
     })
   }
-
+  // 订阅方法，每次调用转台都会被执行
   subscribe (fn) {
     return genericSubscribe(fn, this._subscribers)
   }
@@ -219,7 +219,7 @@ export class Store {
       options
     )
   }
-
+  // 替换状态
   replaceState (state) {
     this._withCommit(() => {
       this._vm._data.$$state = state
@@ -283,7 +283,7 @@ export class Store {
     this._committing = committing
   }
 }
-
+// 生成订阅器
 function genericSubscribe (fn, subs) {
   if (subs.indexOf(fn) < 0) {
     subs.push(fn)
@@ -369,7 +369,7 @@ function installModule (store, rootState, path, module, hot) {
   const namespace = store._modules.getNamespace(path) //  this, state, [], this._modules.root
   // debugger
   // register in namespace map
-  if (module.namespaced) {
+  if (module.namespaced) { // 注册命名空间
     if (
       store._modulesNamespaceMap[namespace] &&
       process.env.NODE_ENV !== 'production'

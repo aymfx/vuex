@@ -5,24 +5,26 @@
  * @param {Object}
  */
 export const mapState = normalizeNamespace((namespace, states) => {
-  const res = {}
+  const res = {}  // 存放结果
   normalizeMap(states).forEach(({ key, val }) => {
     res[key] = function mappedState () {
       let state = this.$store.state
       let getters = this.$store.getters
-      if (namespace) {
+      if (namespace) { // 存在命名空间的话
         const module = getModuleByNamespace(this.$store, 'mapState', namespace)
         if (!module) {
           return
         }
+        // 获取模块的信息 state getters
         state = module.context.state
         getters = module.context.getters
       }
       return typeof val === 'function'
-        ? val.call(this, state, getters)
-        : state[val]
+        ? val.call(this, state, getters)  // 类似这种调用 key ({state,getters})=> state['sss'
+        : state[val]   //  countAlias: 'count',
     }
     // mark vuex getter for devtools
+    // 标记在 devtools 中的 vuex key,将其 flag 调为 true
     res[key].vuex = true
   })
   return res
@@ -35,11 +37,12 @@ export const mapState = normalizeNamespace((namespace, states) => {
  * @return {Object}
  */
 export const mapMutations = normalizeNamespace((namespace, mutations) => {
+  debugger
   const res = {}
   normalizeMap(mutations).forEach(({ key, val }) => {
     res[key] = function mappedMutation (...args) {
       // Get the commit method from store
-      let commit = this.$store.commit
+      let commit = this.$store.commit // 获取到commit 的方法
       if (namespace) {
         const module = getModuleByNamespace(this.$store, 'mapMutations', namespace)
         if (!module) {
@@ -47,8 +50,11 @@ export const mapMutations = normalizeNamespace((namespace, mutations) => {
         }
         commit = module.context.commit
       }
+      // 如果传入的 val 是一个函数，那么执行这个函数，并返回结果
+      // 否则就执行 commit
+      // 这里使用的是 apply 是因为 apply 最合适处理传入不确定数量的参数的情况
       return typeof val === 'function'
-        ? val.apply(this, [commit].concat(args))
+        ? val.apply(this, [commit].concat(args)) // ()=>{}
         : commit.apply(this.$store, [val].concat(args))
     }
   })
@@ -128,7 +134,7 @@ export const createNamespacedHelpers = (namespace) => ({
  * @param {Array|Object} map
  * @return {Object}
  */
-function normalizeMap (map) {
+function normalizeMap (map) { // 对map 进行处理
   return Array.isArray(map)
     ? map.map(key => ({ key, val: key }))
     : Object.keys(map).map(key => ({ key, val: map[key] }))
@@ -141,10 +147,10 @@ function normalizeMap (map) {
  */
 function normalizeNamespace (fn) {
   return (namespace, map) => {
-    if (typeof namespace !== 'string') {
+    if (typeof namespace !== 'string') { // 如果是数组 直接变成map state
       map = namespace
       namespace = ''
-    } else if (namespace.charAt(namespace.length - 1) !== '/') {
+    } else if (namespace.charAt(namespace.length - 1) !== '/') { // 如果存在命名空间 则加一个斜杠
       namespace += '/'
     }
     return fn(namespace, map)
@@ -159,7 +165,7 @@ function normalizeNamespace (fn) {
  * @return {Object}
  */
 function getModuleByNamespace (store, helper, namespace) {
-  const module = store._modulesNamespaceMap[namespace]
+  const module = store._modulesNamespaceMap[namespace] // 获取到命名空间的module
   if (process.env.NODE_ENV !== 'production' && !module) {
     console.error(`[vuex] module namespace not found in ${helper}(): ${namespace}`)
   }
