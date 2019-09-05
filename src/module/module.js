@@ -3,9 +3,10 @@ import { forEachValue } from '../util'
 // Base data struct for store's module, package with some attribute and method
 export default class Module {
   constructor (rawModule, runtime) {
+    debugger
     this.runtime = runtime
     // Store some children item
-    this._children = Object.create(null)
+    this._children = Object.create(null) // 创建一个子模块
     // Store the origin module object which passed by programmer
     this._rawModule = rawModule
     const rawState = rawModule.state

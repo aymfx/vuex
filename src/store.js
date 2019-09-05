@@ -35,7 +35,7 @@ export class Store {
         `store must be called with the new operator.` // 实例必须通过new操作
       )
     }
-
+    debugger
     //  store internal state  仓库的状态  根据传入的参数
     const { plugins = [], strict = false } = options // 接受一些参数
     this._committing = false // 是否正在提交的标识符

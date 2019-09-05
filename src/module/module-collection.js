@@ -9,7 +9,7 @@ export default class ModuleCollection {
   constructor (rawRootModule) {
     // register root module (Vuex.Store options)
     console.log(rawRootModule, '注册options')
-    this.register([], rawRootModule, false)
+    this.register([], rawRootModule, false) // 注册模块
   }
 
   get (path) {
@@ -32,9 +32,9 @@ export default class ModuleCollection {
 
   register (path, rawModule, runtime = true) {
     if (process.env.NODE_ENV !== 'production') {
-      assertRawModule(path, rawModule)
+      assertRawModule(path, rawModule) // 断言是不是一个模块
     }
-
+    debugger
     const newModule = new Module(rawModule, runtime)
     if (path.length === 0) {
       this.root = newModule
@@ -64,6 +64,7 @@ function update (path, targetModule, newModule) {
   if (process.env.NODE_ENV !== 'production') {
     assertRawModule(path, newModule)
   }
+  debugger
 
   // update target module
   targetModule.update(newModule)
@@ -89,27 +90,26 @@ function update (path, targetModule, newModule) {
   }
 }
 
-const functionAssert = {
+const functionAssert = { // 函数的断言  对于 getters mutations 只能是函数  但是 actions可以是对象也可以是函数,是对象的话必须包含handler
   assert: value => typeof value === 'function',
   expected: 'function'
 }
 
-const objectAssert = {
+const objectAssert = { // 对象的断言
   assert: value => typeof value === 'function' ||
     (typeof value === 'object' && typeof value.handler === 'function'),
   expected: 'function or object with "handler" function'
 }
 
-const assertTypes = {
+const assertTypes = { // 断言
   getters: functionAssert,
   mutations: functionAssert,
   actions: objectAssert
 }
 
-function assertRawModule (path, rawModule) {
+function assertRawModule (path, rawModule) { // 检测模块的的getters mutations actions 类型是否正确
   Object.keys(assertTypes).forEach(key => {
     if (!rawModule[key]) return
-
     const assertOptions = assertTypes[key]
 
     forEachValue(rawModule[key], (value, type) => {
@@ -121,7 +121,7 @@ function assertRawModule (path, rawModule) {
   })
 }
 
-function makeAssertionMessage (path, key, type, value, expected) {
+function makeAssertionMessage (path, key, type, value, expected) { // 断言之后的反馈
   let buf = `${key} should be ${expected} but "${key}.${type}"`
   if (path.length > 0) {
     buf += ` in module "${path.join('.')}"`

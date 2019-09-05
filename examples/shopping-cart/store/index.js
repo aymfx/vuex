@@ -13,6 +13,9 @@ export default new Vuex.Store({
     cart,
     products
   },
+  state: {
+
+  },
   strict: debug,
   plugins: debug ? [createLogger()] : []
 })

@@ -10,7 +10,12 @@
 
 <script>
 import { mapGetters, mapActions,mapState,mapMutations} from 'vuex'
-  console.log(mapMutations(['count']))
+  mapActions([
+    'increment',
+    'decrement',
+    'incrementIfOdd',
+    'incrementAsync'
+  ])
 export default {
   computed: mapGetters([
     'evenOrOdd'

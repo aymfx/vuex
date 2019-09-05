@@ -37,7 +37,6 @@ export const mapState = normalizeNamespace((namespace, states) => {
  * @return {Object}
  */
 export const mapMutations = normalizeNamespace((namespace, mutations) => {
-  debugger
   const res = {}
   normalizeMap(mutations).forEach(({ key, val }) => {
     res[key] = function mappedMutation (...args) {
@@ -69,17 +68,22 @@ export const mapMutations = normalizeNamespace((namespace, mutations) => {
  */
 export const mapGetters = normalizeNamespace((namespace, getters) => {
   const res = {}
+
   normalizeMap(getters).forEach(({ key, val }) => {
+    // debugger
     // The namespace has been mutated by normalizeNamespace
-    val = namespace + val
+    val = namespace + val // mapGetters('some/nested/module',['evenOrOdd']) 存在这种写法走这里
     res[key] = function mappedGetter () {
       if (namespace && !getModuleByNamespace(this.$store, 'mapGetters', namespace)) {
         return
-      }
+      } // 如果存在不存在命名空间
       if (process.env.NODE_ENV !== 'production' && !(val in this.$store.getters)) {
         console.error(`[vuex] unknown getter: ${val}`)
         return
       }
+      //
+      console.log(this.$store.getters) // 用命名空间存储数据  已经计算好的数据
+      // debugger
       return this.$store.getters[val]
     }
     // mark vuex getter for devtools
@@ -98,15 +102,17 @@ export const mapActions = normalizeNamespace((namespace, actions) => {
   const res = {}
   normalizeMap(actions).forEach(({ key, val }) => {
     res[key] = function mappedAction (...args) {
+      debugger
       // get dispatch function from store
-      let dispatch = this.$store.dispatch
-      if (namespace) {
+      let dispatch = this.$store.dispatch  // 先拿到根节点的方法
+      if (namespace) { // 存在命名空间的话，则按照子节点的方法触发
         const module = getModuleByNamespace(this.$store, 'mapActions', namespace)
         if (!module) {
           return
         }
         dispatch = module.context.dispatch
       }
+      // 处理方式类似
       return typeof val === 'function'
         ? val.apply(this, [dispatch].concat(args))
         : dispatch.apply(this.$store, [val].concat(args))
