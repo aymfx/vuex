@@ -102,7 +102,7 @@ export const mapActions = normalizeNamespace((namespace, actions) => {
   const res = {}
   normalizeMap(actions).forEach(({ key, val }) => {
     res[key] = function mappedAction (...args) {
-      debugger
+      // debugger
       // get dispatch function from store
       let dispatch = this.$store.dispatch  // 先拿到根节点的方法
       if (namespace) { // 存在命名空间的话，则按照子节点的方法触发

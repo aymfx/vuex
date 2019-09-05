@@ -3,32 +3,32 @@ import { forEachValue } from '../util'
 // Base data struct for store's module, package with some attribute and method
 export default class Module {
   constructor (rawModule, runtime) {
-    debugger
+    // debugger
     this.runtime = runtime
     // Store some children item
     this._children = Object.create(null) // 创建一个子模块
     // Store the origin module object which passed by programmer
-    this._rawModule = rawModule
-    const rawState = rawModule.state
+    this._rawModule = rawModule // 存储原始的store module
+    const rawState = rawModule.state  // 取出 state
 
     // Store the origin module's state
-    this.state = (typeof rawState === 'function' ? rawState() : rawState) || {}
+    this.state = (typeof rawState === 'function' ? rawState() : rawState) || {} // 存放store的state
   }
 
-  get namespaced () {
+  get namespaced () { // 判断是否有命名空间
     return !!this._rawModule.namespaced
   }
 
-  addChild (key, module) {
+  addChild (key, module) { // 添加子节点
     this._children[key] = module
   }
 
-  removeChild (key) {
+  removeChild (key) { // 移除子节点
     delete this._children[key]
   }
 
   getChild (key) {
-    return this._children[key]
+    return this._children[key] // 获取到元素子节点
   }
 
   update (rawModule) {

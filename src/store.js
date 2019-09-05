@@ -35,7 +35,7 @@ export class Store {
         `store must be called with the new operator.` // 实例必须通过new操作
       )
     }
-    debugger
+    // debugger
     //  store internal state  仓库的状态  根据传入的参数
     const { plugins = [], strict = false } = options // 接受一些参数
     this._committing = false // 是否正在提交的标识符
@@ -69,6 +69,7 @@ export class Store {
     // init root module.
     // this also recursively registers all sub-modules
     // and collects all module getters inside this._wrappedGetters
+    debugger
     installModule(this, state, [], this._modules.root) // 模块的安装
 
     // initialize the store vm, which is responsible for the reactivity
@@ -366,10 +367,10 @@ function installModule (store, rootState, path, module, hot) {
    * 判断是否是根目录，以及是否设置了命名空间，若存在则在namespace中进行module的存储，在不是根组件且不是 hot 条件的情况下，通过getNestedState方法拿到该module父级的state，拿到其所在的 moduleName ，调用 Vue.set(parentState, moduleName, module.state) 方法将其state设置到父级state对象的moduleName属性中，由此实现该模块的state注册（首次执行这里，因为是根目录注册，所以并不会执行该条件中的方法）
    */
   const isRoot = !path.length // 判断是不是根目录
-  const namespace = store._modules.getNamespace(path) //  this, state, [], this._modules.root
+  const namespace = store._modules.getNamespace(path) //  获取到命名空间的路径
   // debugger
   // register in namespace map
-  if (module.namespaced) { // 注册命名空间
+  if (module.namespaced) { // 存在是不是命名空间
     if (
       store._modulesNamespaceMap[namespace] &&
       process.env.NODE_ENV !== 'production'
@@ -384,7 +385,7 @@ function installModule (store, rootState, path, module, hot) {
   }
 
   // set state
-  if (!isRoot && !hot) {
+  if (!isRoot && !hot) { // 不能是根路径
     const parentState = getNestedState(rootState, path.slice(0, -1)) // 获取到子元素的state 传给父级的module
     const moduleName = path[path.length - 1]
     store._withCommit(() => {
@@ -392,11 +393,11 @@ function installModule (store, rootState, path, module, hot) {
     })
   }
   // 命名空间和根目录条件判断完毕后，接下来定义local变量和module.context的值，执行makeLocalContext方法，为该module设置局部的 dispatch、commit方法以及getters和state（由于namespace的存在需要做兼容处理）。
-  const local = (module.context = makeLocalContext(store, namespace, path))
-
+  const local = (module.context = makeLocalContext(store, namespace, path)) // 获取 dispatch、commit getter state
+  debugger
   // 注册对应模块的mutation，供state修改使用
-  module.forEachMutation((mutation, key) => {
-    const namespacedType = namespace + key
+  module.forEachMutation((mutation, key) => { // 获取到mutation的key和fn
+    const namespacedType = namespace + key // 空间名字加函数名组成的新的类型
     registerMutation(store, namespacedType, mutation, local)
   })
   // 注册对应模块的action，供数据操作、提交mutation等异步操作使用
@@ -473,6 +474,7 @@ function makeLocalContext (store, namespace, path) {
 
   // getters and state object must be gotten lazily
   // because they will be changed by vm update
+  // 通过getter和state注入到对象属性 方便跟新
   Object.defineProperties(local, {
     getters: {
       get: noNamespace
@@ -512,6 +514,7 @@ function makeLocalGetters (store, namespace) {
 // registerMutation方法中，获取store中的对应mutation type的处理函数集合，将新的处理函数push进去。这里将我们设置在mutations type上对应的 handler 进行了封装，给原函数传入了state。在执行 commit('xxx', payload) 的时候，type为 xxx 的mutation的所有handler都会接收到state以及payload，这就是在handler里面拿到state的原因
 function registerMutation (store, type, handler, local) {
   // 取出对应type的mutations-handler集合
+  debugger
   const entry = store._mutations[type] || (store._mutations[type] = [])
   // commit实际调用的不是我们传入的handler，而是经过封装的
   entry.push(function wrappedMutationHandler (payload) {
