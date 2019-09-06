@@ -62,6 +62,9 @@ const actions = {
 
 // mutations
 const mutations = {
+  fn () {
+    console.log(0)
+  },
   pushProductToCart (state, { id }) {
     state.items.push({
       id,
@@ -84,7 +87,6 @@ const mutations = {
 }
 
 export default {
-  namespaced: true,
   state,
   getters,
   actions,

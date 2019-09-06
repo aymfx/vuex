@@ -45,6 +45,7 @@ export class Store {
     this._wrappedGetters = Object.create(null) // 封装后的getters集合对象
     this._modules = new ModuleCollection(options) // Vuex支持store分模块传入，存储分析后的modules
     this._modulesNamespaceMap = Object.create(null) // 模块命名空间map
+    // debugger
     this._subscribers = [] // 订阅函数集合，Vuex提供了subscribe功能
     this._watcherVM = new Vue() // Vue组件用于watch监视变化
 
@@ -69,13 +70,14 @@ export class Store {
     // init root module.
     // this also recursively registers all sub-modules
     // and collects all module getters inside this._wrappedGetters
-    debugger
+    // debugger
     installModule(this, state, [], this._modules.root) // 模块的安装
 
     // initialize the store vm, which is responsible for the reactivity
     // (also registers _wrappedGetters as computed properties)
-    resetStoreVM(this, state)
-
+    // debugger
+    resetStoreVM(this, state) // 初始化vm Store
+    debugger
     // apply plugins
     plugins.forEach(plugin => plugin(this)) // 应用插件
 
@@ -313,7 +315,7 @@ function resetStoreVM (store, state, hot) {
   const oldVm = store._vm // // 缓存前vm组件
 
   // bind store public getters
-  store.getters = {}
+  store.getters = {} // 绑定公共的 getters
   const wrappedGetters = store._wrappedGetters
   const computed = {}
   forEachValue(wrappedGetters, (fn, key) => {
@@ -322,7 +324,7 @@ function resetStoreVM (store, state, hot) {
     // use computed to leverage its lazy-caching mechanism
     // direct inline function use will lead to closure preserving oldVm.
     // using partial to return function with only arguments preserved in closure enviroment.
-    computed[key] = partial(fn, store)
+    computed[key] = partial(fn, store) // 取每个getter 然后进行处理
     Object.defineProperty(store.getters, key, {
       get: () => store._vm[key],
       enumerable: true // for local getters
@@ -381,20 +383,20 @@ function installModule (store, rootState, path, module, hot) {
         )}`
       )
     }
-    store._modulesNamespaceMap[namespace] = module
+    store._modulesNamespaceMap[namespace] = module // 存放命名空间的模块
   }
 
   // set state
   if (!isRoot && !hot) { // 不能是根路径
-    const parentState = getNestedState(rootState, path.slice(0, -1)) // 获取到子元素的state 传给父级的module
-    const moduleName = path[path.length - 1]
+    const parentState = getNestedState(rootState, path.slice(0, -1)) // 获取父元素的得state
+    const moduleName = path[path.length - 1] // 获取子元素的名称
     store._withCommit(() => {
-      Vue.set(parentState, moduleName, module.state)
+      Vue.set(parentState, moduleName, module.state) // 给父级添加子元素的的states
     })
   }
   // 命名空间和根目录条件判断完毕后，接下来定义local变量和module.context的值，执行makeLocalContext方法，为该module设置局部的 dispatch、commit方法以及getters和state（由于namespace的存在需要做兼容处理）。
   const local = (module.context = makeLocalContext(store, namespace, path)) // 获取 dispatch、commit getter state
-  debugger
+  // debugger
   // 注册对应模块的mutation，供state修改使用
   module.forEachMutation((mutation, key) => { // 获取到mutation的key和fn
     const namespacedType = namespace + key // 空间名字加函数名组成的新的类型
@@ -514,7 +516,7 @@ function makeLocalGetters (store, namespace) {
 // registerMutation方法中，获取store中的对应mutation type的处理函数集合，将新的处理函数push进去。这里将我们设置在mutations type上对应的 handler 进行了封装，给原函数传入了state。在执行 commit('xxx', payload) 的时候，type为 xxx 的mutation的所有handler都会接收到state以及payload，这就是在handler里面拿到state的原因
 function registerMutation (store, type, handler, local) {
   // 取出对应type的mutations-handler集合
-  debugger
+  // debugger
   const entry = store._mutations[type] || (store._mutations[type] = [])
   // commit实际调用的不是我们传入的handler，而是经过封装的
   entry.push(function wrappedMutationHandler (payload) {
@@ -540,7 +542,7 @@ function registerAction (store, type, handler, local) {
         rootState: store.state
       },
       payload,
-      cb
+      cb // 不理解这个
     )
     // action需要支持promise进行链式调用，这里进行兼容处理
     if (!isPromise(res)) {

@@ -6,7 +6,11 @@ const state = {
 }
 
 // getters
-const getters = {}
+const getters = {
+  age () {
+    return ''
+  }
+}
 
 // actions
 const actions = {

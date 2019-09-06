@@ -18,7 +18,7 @@ export default new Vuex.Store({
   },
   mutations: {
     fn () {
-
+      console.log(1212)
     }
   },
   strict: debug,
