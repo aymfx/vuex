@@ -16,3 +16,8 @@ export const incrementAsync = ({ commit }) => {
     commit('increment')
   }, 1000)
 }
+export const incrementAsync2 = ({ commit }) => {
+  setTimeout(() => {
+    commit('increment')
+  }, 1000)
+}

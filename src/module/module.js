@@ -31,7 +31,7 @@ export default class Module {
     return this._children[key] // 获取到元素子节点
   }
 
-  update (rawModule) {
+  update (rawModule) { // 赋值新的模块
     this._rawModule.namespaced = rawModule.namespaced
     if (rawModule.actions) {
       this._rawModule.actions = rawModule.actions

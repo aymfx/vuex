@@ -32,7 +32,7 @@ export default {
     messages: 'sortedMessages'
   }),
   watch: {
-    'thread.lastMessage': function () {
+    'thread.lastMessage': function () { 
       this.$nextTick(() => {
         const ul = this.$refs.list
         ul.scrollTop = ul.scrollHeight
@@ -41,11 +41,12 @@ export default {
   },
   methods: mapActions({
     sendMessage (dispatch) {
+      debugger
       const { text, thread } = this
       if (text.trim()) {
         dispatch('sendMessage', {
           text,
-          thread
+          thread 
         })
         this.text = ''
       }

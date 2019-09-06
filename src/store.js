@@ -274,7 +274,8 @@ export class Store {
   }
 
   hotUpdate (newOptions) {
-    this._modules.update(newOptions)
+    debugger
+    this._modules.update(newOptions)// 对每个模块进行重新的赋值操作
     resetStore(this, true)
   }
   // 缓存执行时的committing状态将当前状态设置为true后进行本次提交操作，待操作完毕后，将committing状态还原为之前的状态。
@@ -299,7 +300,7 @@ function genericSubscribe (fn, subs) {
   }
 }
 
-function resetStore (store, hot) {
+function resetStore (store, hot) { // 清理所有的操作 又开始新的一轮赋值操作
   store._actions = Object.create(null)
   store._mutations = Object.create(null)
   store._wrappedGetters = Object.create(null)

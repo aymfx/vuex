@@ -52,6 +52,7 @@ export const mapMutations = normalizeNamespace((namespace, mutations) => {
       // 如果传入的 val 是一个函数，那么执行这个函数，并返回结果
       // 否则就执行 commit
       // 这里使用的是 apply 是因为 apply 最合适处理传入不确定数量的参数的情况
+
       return typeof val === 'function'
         ? val.apply(this, [commit].concat(args)) // ()=>{}
         : commit.apply(this.$store, [val].concat(args))

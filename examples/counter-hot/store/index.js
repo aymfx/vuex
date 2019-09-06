@@ -17,7 +17,7 @@ const store = new Vuex.Store({
   actions,
   mutations
 })
-
+debugger
 if (module.hot) {
   module.hot.accept([
     './getters',
