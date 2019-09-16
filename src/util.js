@@ -19,7 +19,7 @@ export function find (list, f) {
  * @param {Array<Object>} cache
  * @return {*}
  */
-export function deepCopy (obj, cache = []) {
+export function deepCopy (obj, cache = []) { // 深拷贝的方法
   // just return if obj is immutable value
   if (obj === null || typeof obj !== 'object') {
     return obj
@@ -49,7 +49,7 @@ export function deepCopy (obj, cache = []) {
 /**
  * forEach for object
  */
-export function forEachValue (obj, fn) {
+export function forEachValue (obj, fn) { // 遍历对象
   Object.keys(obj).forEach(key => fn(obj[key], key))
 }
 

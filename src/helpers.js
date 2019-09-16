@@ -127,7 +127,7 @@ export const mapActions = normalizeNamespace((namespace, actions) => {
  * @param {String} namespace
  * @return {Object}
  */
-export const createNamespacedHelpers = (namespace) => ({
+export const createNamespacedHelpers = (namespace) => ({ // 创建局部的命名空间的store
   mapState: mapState.bind(null, namespace),
   mapGetters: mapGetters.bind(null, namespace),
   mapMutations: mapMutations.bind(null, namespace),
